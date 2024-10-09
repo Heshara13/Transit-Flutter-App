@@ -1,4 +1,12 @@
+import 'dart:async';
+
+import 'package:demo03/Driver_screens/driver_main_screen.dart';
+import 'package:demo03/User_Assistants/assistant_methods.dart';
+import 'package:demo03/User_global/global.dart';
+import 'package:demo03/selection_screen.dart';
+import 'package:demo03/user_screens/user_home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -9,9 +17,54 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   String description_1 =
-    "Delivering goods, saving the planet.\nExperience a smarter way to deliver. \nOur app connects you with fast, reliable transport options for all your needs.";
+      "Delivering goods, saving the planet.\nExperience a smarter way to deliver. \nOur app connects you with fast, reliable transport options for all your needs.";
+  void startTimer() {
+    Timer(const Duration(seconds: 3), () async {
+      if (firebaseAuth.currentUser != null) {
+        await AssistantMethods.readCurrentOnlineUserInfo();
 
+        String userId = firebaseAuth.currentUser!.uid;
 
+        DatabaseReference userRef =
+            FirebaseDatabase.instance.ref().child("users").child(userId);
+        DatabaseReference driverRef =
+            FirebaseDatabase.instance.ref().child("drivers").child(userId);
+
+        bool isUser = false;
+        bool isDriver = false;
+
+        DataSnapshot userSnapshot = await userRef.get();
+        DataSnapshot driverSnapshot = await driverRef.get();
+
+        if (userSnapshot.exists) {
+          isUser = true;
+        }
+
+        if (driverSnapshot.exists) {
+          isDriver = true;
+        }
+        if (isUser) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (c) => UserHomeScreen()));
+        } else if (isDriver) {
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (c) => const DriverMainScreen()));
+        } else {
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (c) => const UserSelection()));
+        }
+      } else {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (c) => const UserSelection()));
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    startTimer();
+  }
 
   @override
   Widget build(BuildContext context) {
