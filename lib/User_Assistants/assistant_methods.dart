@@ -1,6 +1,6 @@
-import 'package:Transit-Flutter-App/User_global/global.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:transit_flutter_app/User_Models/user_model.dart';
+import 'package:transit_flutter_app/User_global/global.dart';
 
 class AssistantMethods {
   static Future<void> readCurrentOnlineUserInfo() async {
