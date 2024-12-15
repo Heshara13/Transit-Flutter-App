@@ -1,12 +1,11 @@
 import 'dart:async';
-
-import 'package:demo03/Driver_screens/driver_main_screen.dart';
-import 'package:demo03/User_Assistants/assistant_methods.dart';
-import 'package:demo03/User_global/global.dart';
-import 'package:demo03/selection_screen.dart';
-import 'package:demo03/user_screens/user_home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:transit_flutter_app/Driver_screens/driver_main_screen.dart';
+import 'package:transit_flutter_app/User_Assistants/assistant_methods.dart';
+import 'package:transit_flutter_app/User_global/global.dart';
+import 'package:transit_flutter_app/selection_screen.dart';
+import 'package:transit_flutter_app/user_screen/user_home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
