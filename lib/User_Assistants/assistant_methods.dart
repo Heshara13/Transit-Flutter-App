@@ -1,19 +1,17 @@
-  import 'package:demo03/User_Models/user_model.dart';
-import 'package:demo03/User_global/global.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:transit_flutter_app/User_Models/user_model.dart';
+import 'package:transit_flutter_app/User_global/global.dart';
 
 class AssistantMethods {
-    static Future<void> readCurrentOnlineUserInfo() async {
+  static Future<void> readCurrentOnlineUserInfo() async {
     currentUser = firebaseAuth.currentUser;
     if (currentUser == null) {
       print("No user is currently logged in.");
       return;
     }
 
-    DatabaseReference userRef = FirebaseDatabase.instance
-        .ref()
-        .child("users")
-        .child(currentUser!.uid);
+    DatabaseReference userRef =
+        FirebaseDatabase.instance.ref().child("users").child(currentUser!.uid);
 
     try {
       DatabaseEvent event = await userRef.once();
@@ -28,5 +26,4 @@ class AssistantMethods {
       print("Failed to load user info: $error");
     }
   }
-  }
-  
+}
