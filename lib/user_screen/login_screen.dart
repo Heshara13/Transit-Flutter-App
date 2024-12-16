@@ -1,35 +1,31 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:transit_flutter_app/user_screen/email_verification_screen.dart';
-import 'package:transit_flutter_app/user_screen/login_screen.dart';
 import '../user_global/global.dart';
-import 'social_login.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+import 'forgot_password_screen.dart';
+import 'home_screen.dart';
+import 'register_screen.dart';
+import '../user_assistants/assistant_methods.dart';
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
-  final nameTextEditingController = TextEditingController();
+class _LoginScreenState extends State<LoginScreen> {
   final emailTextEditingController = TextEditingController();
-  final phoneTextEditingController = TextEditingController();
   final passwordTextEditingController = TextEditingController();
 
   bool _passwordVisible = false;
-
   final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
-    nameTextEditingController.dispose();
     emailTextEditingController.dispose();
-    phoneTextEditingController.dispose();
     passwordTextEditingController.dispose();
     super.dispose();
   }
@@ -37,30 +33,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       try {
-        await firebaseAuth.createUserWithEmailAndPassword(
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: emailTextEditingController.text.trim(),
           password: passwordTextEditingController.text.trim(),
-        ).then((auth) async {
-          currentUser = auth.user;
-          if (currentUser != null) {
-            Map<String, String> userMap = {
-              "id": currentUser!.uid,
-              "name": nameTextEditingController.text.trim(),
-              "email": emailTextEditingController.text.trim(),
-              "phone": phoneTextEditingController.text.trim(),
-            };
-            DatabaseReference userRef = FirebaseDatabase.instance.ref().child("users");
-            userRef.child(currentUser!.uid).set(userMap);
-
-            // Send email verification
-            await currentUser!.sendEmailVerification();
-
-            Fluttertoast.showToast(msg: "Successfully Registered. Please check your email to verify your account.");
-
-            // Optional: Navigate to a screen that instructs the user to verify their email
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => EmailVerificationScreen()));
-          }
-        });
+        );
+        currentUser = userCredential.user;
+        await AssistantMethods.readCurrentOnlineUserInfo();
+        Fluttertoast.showToast(msg: "Successfully Logged in");
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => UserHomePage()));
       } catch (error) {
         Fluttertoast.showToast(msg: "Error occurred: \n $error");
       }
@@ -68,7 +48,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       Fluttertoast.showToast(msg: "Not all fields are valid");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +58,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Costormer Registration",style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+          title: Text("User Login",style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
           elevation: 5,
           centerTitle: true,
           backgroundColor: darkTheme ? Colors.black : Colors.blue,
@@ -97,8 +76,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   radius: 50,
                   backgroundImage: AssetImage('images/profileicon.jpg'), 
                 ),
-                Padding(padding: const EdgeInsets.all(10.0),
-                child: Text("Create your account", style: TextStyle(color: darkTheme ? Colors.amber.shade400 : Colors.black, fontSize: 20, fontWeight: FontWeight.bold),)
+                SizedBox(height: 20,),
+                Text(
+                  "Login",
+                  style: TextStyle(
+                    color: darkTheme ? Colors.amber.shade400 : Colors.blue,
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
@@ -106,27 +91,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        TextFormField(
-                          controller: nameTextEditingController,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(50)
-                          ],
-                          decoration: InputDecoration(
-                            hintText: "Name",
-                            hintStyle: TextStyle(color: Colors.grey),
-                            filled: true,
-                            fillColor: darkTheme ? Colors.black45 : Colors.grey.shade200,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: BorderSide(
-                                width: 0,
-                                style: BorderStyle.none,
-                              ),
-                            ),
-                            prefixIcon: Icon(Icons.person, color: darkTheme ? Colors.amber.shade400 : Colors.grey),
-                          ),
-                        ),
-                        SizedBox(height: 10,),
                         TextFormField(
                           controller: emailTextEditingController,
                           inputFormatters: [
@@ -156,27 +120,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             }
                             return null;
                           },
-                        ),
-                        SizedBox(height: 10,),
-                        TextFormField(
-                          controller: phoneTextEditingController,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(50)
-                          ],
-                          decoration: InputDecoration(
-                            hintText: "Phone",
-                            hintStyle: TextStyle(color: Colors.grey),
-                            filled: true,
-                            fillColor: darkTheme ? Colors.black45 : Colors.grey.shade200,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(40),
-                              borderSide: BorderSide(
-                                width: 0,
-                                style: BorderStyle.none,
-                              ),
-                            ),
-                            prefixIcon: Icon(Icons.phone, color: darkTheme ? Colors.amber.shade400 : Colors.grey),
-                          ),
                         ),
                         SizedBox(height: 10,),
                         TextFormField(
@@ -230,29 +173,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
                           onPressed: _submit,
-                          child: Text("Register", style: TextStyle(fontSize: 20)),
+                          child: Text("Login", style: TextStyle(fontSize: 20)),
                         ),
-                        SizedBox(height: 5),
-                        const SocialLogin(),
+                        SizedBox(height: 10,),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => ForgotPasswordScreen()));
+                          },
+                          child: Text(
+                            "Forgot password?",
+                            style: TextStyle(
+                              color: darkTheme ? Colors.amber.shade400 : Colors.blue,
+                            ),
+                          ),
+                        ),
                         SizedBox(height: 10,),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Have an account?",
+                              "Create an account?",
                               style: TextStyle(color: Colors.grey, fontSize: 15),
                             ),
                             SizedBox(width: 5,),
                             GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const LoginScreen()),
-                                );
+                                Navigator.push(context, MaterialPageRoute(builder: (c) => RegisterScreen()));
                               },
                               child: Text(
-                                "Sign In",
+                                "Register",
                                 style: TextStyle(
                                   fontSize: 15,
                                   color: darkTheme ? Colors.amber.shade400 : Colors.blue,
