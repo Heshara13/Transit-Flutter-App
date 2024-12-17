@@ -1,21 +1,25 @@
+import 'package:users/driver_screens/login_screen.dart';
+
+import 'vehicle_info_screen.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:transit_flutter_app/user_screen/email_verification_screen.dart';
-import 'package:transit_flutter_app/user_screen/login_screen.dart';
-import '../user_global/global.dart';
+import '../driver_global/global.dart';
+import 'email_verification_screen.dart';
+import 'main_screen.dart';
 import 'social_login.dart';
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+class DriverRegisterScreen extends StatefulWidget {
+  const DriverRegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<DriverRegisterScreen> createState() => _DriverRegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _DriverRegisterScreenState extends State<DriverRegisterScreen> {
   final nameTextEditingController = TextEditingController();
   final emailTextEditingController = TextEditingController();
   final phoneTextEditingController = TextEditingController();
@@ -37,10 +41,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       try {
-        await firebaseAuth.createUserWithEmailAndPassword(
+        await firebaseAuth
+            .createUserWithEmailAndPassword(
           email: emailTextEditingController.text.trim(),
           password: passwordTextEditingController.text.trim(),
-        ).then((auth) async {
+        )
+            .then((auth) async {
           currentUser = auth.user;
           if (currentUser != null) {
             Map<String, String> userMap = {
@@ -49,17 +55,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
               "email": emailTextEditingController.text.trim(),
               "phone": phoneTextEditingController.text.trim(),
             };
-            DatabaseReference userRef = FirebaseDatabase.instance.ref().child("users");
+            DatabaseReference userRef =
+                FirebaseDatabase.instance.ref().child("drivers");
             userRef.child(currentUser!.uid).set(userMap);
-
-            // Send email verification
-            await currentUser!.sendEmailVerification();
-
-            Fluttertoast.showToast(msg: "Successfully Registered. Please check your email to verify your account.");
-
-            // Optional: Navigate to a screen that instructs the user to verify their email
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => EmailVerificationScreen()));
           }
+          Fluttertoast.showToast(msg: "Successfully Registered");
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (c) => EmailVerificationScreen()));
         });
       } catch (error) {
         Fluttertoast.showToast(msg: "Error occurred: \n $error");
@@ -69,17 +71,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    bool darkTheme = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    bool darkTheme =
+        MediaQuery.of(context).platformBrightness == Brightness.dark;
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Costormer Registration",style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+          title: Text("Driver Registration",style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
           elevation: 5,
           centerTitle: true,
           backgroundColor: darkTheme ? Colors.black : Colors.blue,
@@ -115,7 +117,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             hintText: "Name",
                             hintStyle: TextStyle(color: Colors.grey),
                             filled: true,
-                            fillColor: darkTheme ? Colors.black45 : Colors.grey.shade200,
+                            fillColor: darkTheme
+                                ? Colors.black45
+                                : Colors.grey.shade200,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(40),
                               borderSide: BorderSide(
@@ -123,10 +127,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: BorderStyle.none,
                               ),
                             ),
-                            prefixIcon: Icon(Icons.person, color: darkTheme ? Colors.amber.shade400 : Colors.grey),
+                            prefixIcon: Icon(Icons.person,
+                                color: darkTheme
+                                    ? Colors.amber.shade400
+                                    : Colors.grey),
                           ),
                         ),
-                        SizedBox(height: 10,),
+                        SizedBox(
+                          height: 10,
+                        ),
                         TextFormField(
                           controller: emailTextEditingController,
                           inputFormatters: [
@@ -136,7 +145,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             hintText: "e-mail",
                             hintStyle: TextStyle(color: Colors.grey),
                             filled: true,
-                            fillColor: darkTheme ? Colors.black45 : Colors.grey.shade200,
+                            fillColor: darkTheme
+                                ? Colors.black45
+                                : Colors.grey.shade200,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(40),
                               borderSide: BorderSide(
@@ -144,7 +155,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: BorderStyle.none,
                               ),
                             ),
-                            prefixIcon: Icon(Icons.email, color: darkTheme ? Colors.amber.shade400 : Colors.grey),
+                            prefixIcon: Icon(Icons.email,
+                                color: darkTheme
+                                    ? Colors.amber.shade400
+                                    : Colors.grey),
                           ),
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           validator: (text) {
@@ -157,7 +171,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return null;
                           },
                         ),
-                        SizedBox(height: 10,),
+                        SizedBox(
+                          height: 10,
+                        ),
                         TextFormField(
                           controller: phoneTextEditingController,
                           inputFormatters: [
@@ -167,7 +183,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             hintText: "Phone",
                             hintStyle: TextStyle(color: Colors.grey),
                             filled: true,
-                            fillColor: darkTheme ? Colors.black45 : Colors.grey.shade200,
+                            fillColor: darkTheme
+                                ? Colors.black45
+                                : Colors.grey.shade200,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(40),
                               borderSide: BorderSide(
@@ -175,10 +193,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: BorderStyle.none,
                               ),
                             ),
-                            prefixIcon: Icon(Icons.phone, color: darkTheme ? Colors.amber.shade400 : Colors.grey),
+                            prefixIcon: Icon(Icons.phone,
+                                color: darkTheme
+                                    ? Colors.amber.shade400
+                                    : Colors.grey),
                           ),
                         ),
-                        SizedBox(height: 10,),
+                        SizedBox(
+                          height: 10,
+                        ),
                         TextFormField(
                           controller: passwordTextEditingController,
                           obscureText: !_passwordVisible,
@@ -189,7 +212,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             hintText: "Password",
                             hintStyle: TextStyle(color: Colors.grey),
                             filled: true,
-                            fillColor: darkTheme ? Colors.black45 : Colors.grey.shade200,
+                            fillColor: darkTheme
+                                ? Colors.black45
+                                : Colors.grey.shade200,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(40),
                               borderSide: BorderSide(
@@ -197,11 +222,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: BorderStyle.none,
                               ),
                             ),
-                            prefixIcon: Icon(Icons.password, color: darkTheme ? Colors.amber.shade400 : Colors.grey),
+                            prefixIcon: Icon(Icons.password,
+                                color: darkTheme
+                                    ? Colors.amber.shade400
+                                    : Colors.grey),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _passwordVisible ? Icons.visibility : Icons.visibility_off,
-                                color: darkTheme ? Colors.amber.shade400 : Colors.grey,
+                                _passwordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: darkTheme
+                                    ? Colors.amber.shade400
+                                    : Colors.grey,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -220,42 +252,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return null;
                           },
                         ),
-                        SizedBox(height: 10,),
+                        SizedBox(
+                          height: 15,
+                        ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: darkTheme ? Colors.grey : Colors.blue,
-                            elevation: 0,
+                            backgroundColor:
+                                darkTheme ? Colors.grey : Colors.blue,
+                            elevation: 5,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(40),
                             ),
                           ),
                           onPressed: _submit,
-                          child: Text("Register", style: TextStyle(fontSize: 20)),
+                          child: Text("Register", style: TextStyle(fontSize: 20, color: Colors.white)),
                         ),
-                        SizedBox(height: 5),
+                        SizedBox(height: 10),
                         const SocialLogin(),
-                        SizedBox(height: 10,),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        GestureDetector(
+                          onTap: () {},
+                          child: Text(
+                            "Forgot password?",
+                            style: TextStyle(
+                              color: darkTheme
+                                  ? Colors.amber.shade400
+                                  : Colors.blue,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               "Have an account?",
-                              style: TextStyle(color: Colors.grey, fontSize: 15),
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 15),
                             ),
-                            SizedBox(width: 5,),
+                            SizedBox(
+                              width: 5,
+                            ),
                             GestureDetector(
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const LoginScreen()),
+                                      builder: (context) => const DriverLoginScreen()),
                                 );
                               },
                               child: Text(
                                 "Sign In",
                                 style: TextStyle(
                                   fontSize: 15,
-                                  color: darkTheme ? Colors.amber.shade400 : Colors.blue,
+                                  color: darkTheme
+                                      ? Colors.amber.shade400
+                                      : Colors.blue,
                                 ),
                               ),
                             ),
